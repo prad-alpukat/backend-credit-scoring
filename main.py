@@ -50,7 +50,7 @@ joblib_file = "model.pkl"
 model = joblib.load(joblib_file)
 
 @app.get("/")
-async def read_root(request):
+async def read_root():
    result = predict_loan_approval( model,58,2143,5,261,1,-1,0,'management','married','tertiary','no','yes','no','unknown','may','unknown')
    return {"message": "Welcome to the API", "result": result}
 
