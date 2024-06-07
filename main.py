@@ -1,9 +1,5 @@
 from typing import Union
 from fastapi import FastAPI
-
-# model libraries
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import StandardScaler
 import joblib
 import numpy as np
 
@@ -11,13 +7,11 @@ app = FastAPI()
 import numpy as np
 
 def custom_label_encode(arr):
-    """Custom label encoder using a dictionary."""
     unique_vals = np.unique(arr)
     encode_dict = {val: idx for idx, val in enumerate(unique_vals)}
     return np.vectorize(encode_dict.get)(arr), encode_dict
 
 def custom_standard_scale(arr):
-    """Custom standard scaler using mean and std deviation."""
     mean = np.mean(arr)
     std = np.std(arr)
     return (arr - mean) / std if std != 0 else arr
@@ -62,12 +56,6 @@ def predict_loan_approval(model, age, balance, day, duration, campaign, pdays, p
     # Predict the loan approval
     prediction = model.predict(data_array)
     return prediction[0].tolist()
-
-# Example usage (assuming 'model' is a pre-trained model instance):
-# prediction = predict_loan_approval(model, age=35, balance=1500, day=15, duration=300, campaign=1,
-#                                    pdays=5, previous=0, job='admin', marital='married', education='tertiary',
-#                                    default='no', housing='yes', loan='no', contact='cellular', month='may', poutcome='success')
-
     
 joblib_file = "model.pkl"
 model = joblib.load(joblib_file)
