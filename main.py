@@ -57,7 +57,7 @@ def predict_loan_approval(model, age, balance, day, duration, campaign, pdays, p
     prediction = model.predict(data_array)
     return prediction[0].tolist()
     
-joblib_file = "model.pkl"
+joblib_file = "./model.pkl"
 model = joblib.load(joblib_file)
 
 @app.get("/")
