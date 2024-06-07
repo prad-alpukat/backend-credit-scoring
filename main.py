@@ -1,7 +1,8 @@
 from typing import Union
 from fastapi import FastAPI
-import joblib
+from joblib import parallel_backend
 import numpy as np
+import joblib
 
 app = FastAPI()
 import numpy as np
@@ -58,7 +59,8 @@ def predict_loan_approval(model, age, balance, day, duration, campaign, pdays, p
     return prediction[0].tolist()
     
 joblib_file = "./model.pkl"
-model = joblib.load(joblib_file, "r")
+with parallel_backend("loky"):
+    model = joblib.load(joblib_file, "r")
 
 @app.get("/")
 async def read_root():
