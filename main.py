@@ -5,46 +5,52 @@ from fastapi import FastAPI
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 import joblib
-import pandas as pd
+import numpy as np
 
 app = FastAPI()
 
 # predict load approval
-def predict_loan_approval(model,age,balance,day,duration,campaign,pdays,previous,job,marital,education,default,housing,loan,contact,month,poutcome):
-    data = {
-        'age':age,
-        'job':job,
-        'marital':marital,
-        'education':education,
-        'default':default,
-        'balance':balance,
-        'housing':housing,
-        'loan':loan,
-        'contact':contact,
-        'day':day,
-        'month':month,
-        'duration':duration,
-        'campaign':campaign,
-        'pdays':pdays,
-        'previous':previous,
-        'poutcome':poutcome
+def predict_loan_approval(model, age, balance, day, duration, campaign, pdays, previous, 
+                          job, marital, education, default, housing, loan, contact, month, poutcome):
+    # Create a dictionary to store the data
+    data_dict = {
+        'age': np.array([age]),
+        'balance': np.array([balance]),
+        'day': np.array([day]),
+        'duration': np.array([duration]),
+        'campaign': np.array([campaign]),
+        'pdays': np.array([pdays]),
+        'previous': np.array([previous]),
+        'job': np.array([job]),
+        'marital': np.array([marital]),
+        'education': np.array([education]),
+        'default': np.array([default]),
+        'housing': np.array([housing]),
+        'loan': np.array([loan]),
+        'contact': np.array([contact]),
+        'month': np.array([month]),
+        'poutcome': np.array([poutcome])
     }
-    data=pd.DataFrame(data,index=[0])
-    list2=['age','balance','day','duration','campaign','pdays','previous']
-    LE=LabelEncoder()
-    sc=StandardScaler()
-    data['job']=LE.fit_transform(data['job'])
-    data['marital']=LE.fit_transform(data['marital'])
-    data['education']=LE.fit_transform(data['education'])
-    data['default']=LE.fit_transform(data['default'])
-    data['housing']=LE.fit_transform(data['housing'])
-    data['loan']=LE.fit_transform(data['loan'])
-    data['contact']=LE.fit_transform(data['contact'])
-    data['month']=LE.fit_transform(data['month'])
-    data['poutcome']=LE.fit_transform(data['poutcome'])
-    data[list2]=sc.fit_transform(data[list2])
-    prediction = model.predict(data)
-    return  prediction[0].tolist()
+    
+    # List of numerical columns to scale
+    numerical_columns = ['age', 'balance', 'day', 'duration', 'campaign', 'pdays', 'previous']
+    
+    # Encode categorical features using dictionaries
+    LE = LabelEncoder()
+    for feature in ['job', 'marital', 'education', 'default', 'housing', 'loan', 'contact', 'month', 'poutcome']:
+        data_dict[feature] = LE.fit_transform(data_dict[feature])
+    
+    # Scale numerical features using StandardScaler
+    sc = StandardScaler()
+    for feature in numerical_columns:
+        data_dict[feature] = sc.fit_transform(data_dict[feature].reshape(-1, 1)).flatten()
+
+    # Combine all features into a single NumPy array
+    data_array = np.column_stack([data_dict[feature] for feature in data_dict.keys()])
+
+    # Predict the loan approval
+    prediction = model.predict(data_array)
+    return prediction[0].tolist()
     
 joblib_file = "model.pkl"
 model = joblib.load(joblib_file)
